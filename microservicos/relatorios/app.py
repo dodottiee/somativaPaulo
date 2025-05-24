@@ -1,12 +1,14 @@
 from flask import Flask, jsonify
 import requests
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # URLs dos microserviços
-PRODUCAO_URL = "http://localhost:5001/ordem"
-QUALIDADE_URL = "http://localhost:5002/inspecao"
-PECAS_URL = "http://localhost:5003/componente"
+QUALIDADE_URL = "http://qualidade:5000/inspecao"
+PECAS_URL = "http://pecas:5000/componente"
+PRODUCAO_URL = "http://producao:5000/ordem"
 
 @app.route('/relatorio/completo/<int:ordem_id>', methods=['GET'])
 def relatorio_completo(ordem_id):
@@ -42,4 +44,4 @@ def relatorio_pecas(id):
         return jsonify({"message": "Resposta não é um JSON válido"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5004)
+    app.run(debug=True, host='0.0.0.0', port=5000)

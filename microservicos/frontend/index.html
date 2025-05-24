@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Microserviços</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+        }
+
+        h2 {
+            color: #1b5e20;
+            margin-top: 40px;
+        }
+
+        label {
+            display: block;
+            margin: 8px 0 4px;
+        }
+
+        input {
+            width: calc(100% - 12px);
+            padding: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #2e7d32;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1b5e20;
+        }
+
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        hr {
+            margin: 40px 0;
+            border: 0;
+            border-top: 1px solid #ccc;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Microserviços</h1>
+
+    <div class="card">
+        <h2>Criar Ordem de Produção</h2>
+        <label>Status:</label>
+        <input type="text" id="statusOrdem" placeholder="Ex: Em produção">
+
+        <label>Etapa:</label>
+        <input type="text" id="etapaOrdem" placeholder="Ex: Montagem">
+
+        <label>Descrição:</label>
+        <input type="text" id="descricaoOrdem" placeholder="Ex: Lote ABC123">
+
+        <button onclick="criarOrdem()">Criar Ordem</button>
+        <pre id="resOrdem"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Criar Inspeção</h2>
+        <label>Ordem ID:</label>
+        <input type="number" id="ordemIdInspecao" placeholder="ID da Ordem">
+
+        <label>Status:</label>
+        <input type="text" id="statusInspecao" placeholder="Ex: Aprovado/Falha">
+
+        <label>Não Conformidade:</label>
+        <input type="text" id="ncInspecao" placeholder="Ex: Defeito no freio">
+
+        <button onclick="criarInspecao()">Criar Inspeção</button>
+        <pre id="resInspecao"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Criar Componente</h2>
+        <label>Nome:</label>
+        <input type="text" id="nomeComponente" placeholder="Ex: Parafuso">
+
+        <label>Veículo ID:</label>
+        <input type="number" id="ordemIdComponente" placeholder="ID do transporte">
+
+        <label>Quantidade:</label>
+        <input type="number" id="quantidadeComponente" placeholder="Ex: 50">
+
+        <button onclick="criarComponente()">Criar Componente</button>
+        <pre id="resComponente"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Gerar Relatório Completo</h2>
+        <label>ID da Ordem:</label>
+        <input type="number" id="relatorioId" placeholder="ID da Ordem">
+
+        <button onclick="gerarRelatorio()">Buscar Relatório</button>
+        <pre id="resRelatorio"></pre>
+    </div>
+
+<script>
+const api = {
+    producao: 'http://localhost:5001/ordem',
+    qualidade: 'http://localhost:5002/inspecao',
+    pecas: 'http://localhost:5003/componente',
+    relatorios: 'http://localhost:5004/relatorio/completo'
+};
+
+function criarOrdem() {
+    const status = document.getElementById('statusOrdem').value;
+    const etapa = document.getElementById('etapaOrdem').value;
+    const descricao = document.getElementById('descricaoOrdem').value;
+
+    fetch(api.producao, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status, etapa, descricao})
+    })
+    .then(res => res.json())
+    .then(data => document.getElementById('resOrdem').innerText = JSON.stringify(data, null, 2));
+}
+
+function criarInspecao() {
+    const ordem_id = parseInt(document.getElementById('ordemIdInspecao').value);
+    const status = document.getElementById('statusInspecao').value;
+    const nao_conformidade = document.getElementById('ncInspecao').value;
+
+    fetch(api.qualidade, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ordem_id, status, nao_conformidade})
+    })
+    .then(res => res.json())
+    .then(data => document.getElementById('resInspecao').innerText = JSON.stringify(data, null, 2));
+}
+
+function criarComponente() {
+    const nome = document.getElementById('nomeComponente').value;
+    const veiculo_id = parseInt(document.getElementById('ordemIdComponente').value);
+    const quantidade = parseInt(document.getElementById('quantidadeComponente').value);
+
+    fetch(api.pecas, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nome, veiculo_id, quantidade})
+    })
+    .then(res => res.json())
+    .then(data => document.getElementById('resComponente').innerText = JSON.stringify(data, null, 2));
+}
+
+function gerarRelatorio() {
+    const id = document.getElementById('relatorioId').value;
+    fetch(`${api.relatorios}/${id}`)
+    .then(res => res.json())
+    .then(data => document.getElementById('resRelatorio').innerText = JSON.stringify(data, null, 2));
+}
+</script>
+</body>
+</html>
